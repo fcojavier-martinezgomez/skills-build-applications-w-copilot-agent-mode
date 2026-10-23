@@ -28,22 +28,20 @@ OctoFit Tracker is a three-tier application for a school fitness program. The st
 
 ## Implementation decisions
 
-Record your plan here before editing code.
-
-- Presentation tier decision:
-- Logic tier decision:
-- Data tier decision:
-- Activity tracking approach:
-- Team management approach:
-- Leaderboard approach:
-- Workout suggestions approach:
+- Presentation tier decision: Keep the React app thin and focused on rendering, route-driven navigation, and calling the shared API client; avoid putting business logic in components.
+- Logic tier decision: Implement Express route handlers and service logic in TypeScript so validation, normalization, and HTTP error handling live in the API layer rather than in the database layer.
+- Data tier decision: Use Mongoose schemas and seeded sample data to model users, teams, and activities consistently, with computed fields stored when appropriate for leaderboard and analytics features.
+- Activity tracking approach: Accept activity submissions with explicit validation for user and team IDs, normalize the stored fields, and compute points plus occurredAt before persisting to ensure the API returns stable records and avoids Mongoose cast errors leaking as 500s.
+- Team management approach: Allow teams to be created with name and mascot, while rejecting invalid or missing names with a clear 400 response; list endpoints should return the persisted team members in a consistent shape.
+- Leaderboard approach: Aggregate each team’s activity points in a query-friendly way and sort descending by total so the ranking is deterministic and easy to expose as a 1-based leaderboard list.
+- Workout suggestions approach: Match the requested user email against seeded user records, inspect recent activity patterns, and return recommendations whose focus aligns with the user’s fitness goal or recent effort, explaining the reasoning in each suggestion.
 
 ## Test plan
 
-Record the commands you run and what each failure means.
+Record the commands you run and what each failure means. The current checks cover data persistence, API contract behavior, frontend behavior, and successful builds.
 
-- Data-tier command: `npm run test:data --prefix octofit-tracker/backend`
-- API command: `npm run test:api --prefix octofit-tracker/backend`
-- Frontend command: `npm test --prefix octofit-tracker/frontend`
-- Backend build command: `npm run build --prefix octofit-tracker/backend`
-- Frontend build command: `npm run build --prefix octofit-tracker/frontend`
+- Data-tier tests: `npm run test:data --prefix octofit-tracker/backend` — verify persisted model data and computed activity fields.
+- API tests: `npm run test:api --prefix octofit-tracker/backend` — verify endpoint responses, validation errors, leaderboard results, and workout suggestions.
+- Frontend tests: `npm test --prefix octofit-tracker/frontend` — verify the current frontend behavior.
+- Backend build: `npm run build --prefix octofit-tracker/backend` — check the TypeScript backend build.
+- Frontend build: `npm run build --prefix octofit-tracker/frontend` — check the frontend production build.
